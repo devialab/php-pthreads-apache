@@ -44,15 +44,8 @@ RUN set -ex \
 		&& chown -R "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$dir"; \
 	done
 
-# Apache + PHP requires preforking Apache for best results
-RUN a2dismod mpm_event && a2enmod mpm_prefork
-
-# Logs should go to stdout / stderr
-RUN set -ex \
-	&& . "$APACHE_ENVVARS" \
-	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"
+# Enable Apache mods for better performance
+RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite
 
 # PHP files should be handled by PHP, and should be preferred over any other file type
 RUN { \
@@ -120,6 +113,7 @@ RUN set -xe \
 		--with-libedit \
 		--with-openssl \
 		--with-zlib \
+		--with-mysqli \
 	&& make -j"$(nproc)" \
 	&& make install \
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
