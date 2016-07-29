@@ -45,7 +45,7 @@ RUN set -ex \
 	done
 
 # Enable Apache mods for better performance
-RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite
+RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite && a2enmod headers
 
 # Logs should go to stdout / stderr
 RUN set -ex \
